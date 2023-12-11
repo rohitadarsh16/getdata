@@ -17,14 +17,18 @@ async def random_sleep(mintime, maxtime):
     await asyncio.sleep(random.randint(mintime, maxtime))
 
 async def fetch_product_data(session, product_url):
+    # cookies = {
+    # 'uaid': 'dugPSIO2WQ9DuMxRqEg5T6d_kw9jZACC1BLNmzC6Wqk0MTNFyUopxzyt3Dyy1Cu1yjGlLLfCIySsyNgyUTcxsVLXRKmWAQA.',
+    # 'user_prefs': 'bJpwgCwePL3lqmPlglGKzriogWFjZACC1BLNmxBaKydaydMvSEknrzQnR0cpNU_X3UlJRyk0GCpiBKFwEbEMAA..',
+    # 'fve': '1702111705.0',
+    # '_fbp': 'fb.1.1702111705102.9642053264653538',
+    # 'exp_ebid': 'm=%2BMJvgTGAjDMD0LNJVNObiIDNonid06PVkZIpQ8YfQvQ%3D,v=hsp-q1QuE8w06w_NyE1F4LwtbzyxqX2q',
+    # 'datadome': '',
+    # 'ua': '531227642bc86f3b5fd7103a0c0b4fd6',
+    # 'last_browse_page': '',
+    # }
     cookies = {
-    'uaid': 'dugPSIO2WQ9DuMxRqEg5T6d_kw9jZACC1BLNmzC6Wqk0MTNFyUopxzyt3Dyy1Cu1yjGlLLfCIySsyNgyUTcxsVLXRKmWAQA.',
-    'user_prefs': 'bJpwgCwePL3lqmPlglGKzriogWFjZACC1BLNmxBaKydaydMvSEknrzQnR0cpNU_X3UlJRyk0GCpiBKFwEbEMAA..',
-    'fve': '1702111705.0',
-    '_fbp': 'fb.1.1702111705102.9642053264653538',
-    'exp_ebid': 'm=%2BMJvgTGAjDMD0LNJVNObiIDNonid06PVkZIpQ8YfQvQ%3D,v=hsp-q1QuE8w06w_NyE1F4LwtbzyxqX2q',
     'datadome': '',
-    'ua': '531227642bc86f3b5fd7103a0c0b4fd6',
     'last_browse_page': '',
     }
 
@@ -66,15 +70,19 @@ async def fetch_product_data(session, product_url):
 async def get_page_data(session, page, url):
     global mintime
     global maxtime
+    # cookies = {
+    #     'uaid': 'dugPSIO2WQ9DuMxRqEg5T6d_kw9jZACC1BLNmzC6Wqk0MTNFyUopxzyt3Dyy1Cu1yjGlLLfCIySsyNgyUTcxsVLXRKmWAQA.',
+    #     'user_prefs': 'bJpwgCwePL3lqmPlglGKzriogWFjZACC1BLNmxBaKydaydMvSEknrzQnR0cpNU_X3UlJRyk0GCpiBKFwEbEMAA..',
+    #     'fve': '1702111705.0',
+    #     '_fbp': 'fb.1.1702111705102.9642053264653538',
+    #     'exp_ebid': 'm=%2BMJvgTGAjDMD0LNJVNObiIDNonid06PVkZIpQ8YfQvQ%3D,v=hsp-q1QuE8w06w_NyE1F4LwtbzyxqX2q',
+    #     'datadome': '',
+    #     'ua': '531227642bc86f3b5fd7103a0c0b4fd6',
+    #     'gtm_deferred': '%5B%5D',
+    # }
     cookies = {
-        'uaid': 'dugPSIO2WQ9DuMxRqEg5T6d_kw9jZACC1BLNmzC6Wqk0MTNFyUopxzyt3Dyy1Cu1yjGlLLfCIySsyNgyUTcxsVLXRKmWAQA.',
-        'user_prefs': 'bJpwgCwePL3lqmPlglGKzriogWFjZACC1BLNmxBaKydaydMvSEknrzQnR0cpNU_X3UlJRyk0GCpiBKFwEbEMAA..',
-        'fve': '1702111705.0',
-        '_fbp': 'fb.1.1702111705102.9642053264653538',
-        'exp_ebid': 'm=%2BMJvgTGAjDMD0LNJVNObiIDNonid06PVkZIpQ8YfQvQ%3D,v=hsp-q1QuE8w06w_NyE1F4LwtbzyxqX2q',
-        'datadome': '',
-        'ua': '531227642bc86f3b5fd7103a0c0b4fd6',
-        'gtm_deferred': '%5B%5D',
+    'datadome': '',
+    'last_browse_page': '',
     }
 
     headers = {
@@ -123,46 +131,48 @@ async def get_page_data(session, page, url):
     async with aiohttp.ClientSession() as session:
         tasks = [fetch_product_data(session, product_url) for product_url in all_links]
         results = await asyncio.gather(*tasks)
-    product_frequency = {}
-
     for index, data in enumerate(productlist):
         product_name =  data.find('div',class_='v2-listing-card__info').find('h3').text.strip()
         product_url = all_links[index]
         product_price = results[index]
 
         # Check if product already exists in productdata
-        existing_product = next((item for item in productdata if item["Product Name"] == product_name), None)
+        # existing_product = next((item for item in totaldata if item["Product Name"] == product_name), None)
 
-        if existing_product:
-            # If product exists, increment frequency
-            existing_product["Frequency"] += 1
-        else:
+        # if existing_product:
+        #     # If product exists, increment frequency
+        #     existing_product["Frequency"] += 1
+            
+        # else:
             # If product doesn't exist, add to productdata and set frequency to 1
-            product_frequency[product_name] = 1
-            products = {
-                "Shop Name":  url.split("/")[4],
-                "Product Name": product_name,
-                "Price": product_price,
-                "Frequency": product_frequency[product_name],
-                "Product urls": product_url
-            }
-            productdata.append(products)
-        await random_sleep(mintime,maxtime)
+        products = {    
+            "Shop Name":  url.split("/")[4],
+            "Product Name": product_name,
+            "Price": product_price,
+            "Frequency": 1,
+            "Product urls": product_url
+        }
+        productdata.append(products)
+    await random_sleep(mintime,maxtime)
 
     return productdata
 
 
 async def main():
+    # cookies = {
+    # 'uaid': 'dugPSIO2WQ9DuMxRqEg5T6d_kw9jZACC1BLNmzC6Wqk0MTNFyUopxzyt3Dyy1Cu1yjGlLLfCIySsyNgyUTcxsVLXRKmWAQA.',
+    # 'user_prefs': 'bJpwgCwePL3lqmPlglGKzriogWFjZACC1BLNmxBaKydaydMvSEknrzQnR0cpNU_X3UlJRyk0GCpiBKFwEbEMAA..',
+    # 'fve': '1702111705.0',
+    # '_fbp': 'fb.1.1702111705102.9642053264653538',
+    # 'exp_ebid': 'm=%2BMJvgTGAjDMD0LNJVNObiIDNonid06PVkZIpQ8YfQvQ%3D,v=hsp-q1QuE8w06w_NyE1F4LwtbzyxqX2q',
+    # 'datadome': '',
+    # 'ua': '531227642bc86f3b5fd7103a0c0b4fd6',
+    # 'last_browse_page': 'https%3A%2F%2Fwww.etsy.com%2Fshop%2FMattBuildsIt',
+    # 'gtm_deferred': '%5B%5D',
+    # }
     cookies = {
-    'uaid': 'dugPSIO2WQ9DuMxRqEg5T6d_kw9jZACC1BLNmzC6Wqk0MTNFyUopxzyt3Dyy1Cu1yjGlLLfCIySsyNgyUTcxsVLXRKmWAQA.',
-    'user_prefs': 'bJpwgCwePL3lqmPlglGKzriogWFjZACC1BLNmxBaKydaydMvSEknrzQnR0cpNU_X3UlJRyk0GCpiBKFwEbEMAA..',
-    'fve': '1702111705.0',
-    '_fbp': 'fb.1.1702111705102.9642053264653538',
-    'exp_ebid': 'm=%2BMJvgTGAjDMD0LNJVNObiIDNonid06PVkZIpQ8YfQvQ%3D,v=hsp-q1QuE8w06w_NyE1F4LwtbzyxqX2q',
     'datadome': '',
-    'ua': '531227642bc86f3b5fd7103a0c0b4fd6',
-    'last_browse_page': 'https%3A%2F%2Fwww.etsy.com%2Fshop%2FMattBuildsIt',
-    'gtm_deferred': '%5B%5D',
+    'last_browse_page': '',
     }
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
@@ -177,7 +187,7 @@ async def main():
         'Sec-Fetch-User': '?1',
         'Pragma': 'no-cache',
         'Cache-Control': 'no-cache',
-         'x-requested-with': 'xhr',
+        'x-requested-with': 'xhr',
         "x-cors-api-key": 'live_817ed3e527e8bf3d732be35c373371979933c782c6e8a84617bfe6e414646066',
         # Requests doesn't support trailers
         # 'TE': 'trailers',
@@ -195,14 +205,24 @@ async def main():
                 last_page_number = int(last_page_link.find('a').get('data-page')) if last_page_link else None
             except:
                 last_page_number = 1
+            pagecount = 0
             for page in range(1, last_page_number + 1):
                 data = await get_page_data(session, page, url)
                 totaldata.extend(data)
                 shopname = url.split("/")[4]
                 print(data)
-                print(f"Page {page} done for {shopname}")
+                print(f"Page {page} done for {shopname} removing duplicates increase frequncy and saving to excel")
                 backupdf = pd.DataFrame(totaldata)
+                backupdf['Frequency'] = backupdf.groupby('Product Name')['Frequency'].transform('sum')
+                backupdf = backupdf.drop_duplicates(subset='Product Name')
                 backupdf.to_excel("Backup.xlsx", index=False)
+                totaldata = backupdf.to_dict('records')
+                if pagecount == 5 :
+                    print("Sleeping for 1, 6 seconds")
+                    time.sleep(random.randint(3, 15)) 
+                    print("awake again fecthing data....")
+                    pagecount = 0
+                pagecount += 1
     df = pd.DataFrame(totaldata)
     df.to_excel("output.xlsx", index=False)
 if __name__ == "__main__":
