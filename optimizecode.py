@@ -63,7 +63,7 @@ async def fetch_product_data(session, product_url):
 
     
 
-async def get_page_data(session, page, url, totaldata):
+async def get_page_data(session, page, url):
     global mintime
     global maxtime
     cookies = {
@@ -123,7 +123,7 @@ async def get_page_data(session, page, url, totaldata):
     async with aiohttp.ClientSession() as session:
         tasks = [fetch_product_data(session, product_url) for product_url in all_links]
         results = await asyncio.gather(*tasks)
-    product_frequency = {}
+    # product_frequency = {}
 
     for index, data in enumerate(productlist):
         product_name =  data.find('div',class_='v2-listing-card__info').find('h3').text.strip()
@@ -131,24 +131,23 @@ async def get_page_data(session, page, url, totaldata):
         product_price = results[index]
 
         # Check if product already exists in productdata
-        existing_product = next((item for item in totaldata if item["Product Name"] == product_name), None)
+        # existing_product = next((item for item in totaldata if item["Product Name"] == product_name), None)
 
-        if existing_product:
-            # If product exists, increment frequency
-            existing_product["Frequency"] += 1
+        # if existing_product:
+        #     # If product exists, increment frequency
+        #     existing_product["Frequency"] += 1
             
-        else:
+        # else:
             # If product doesn't exist, add to productdata and set frequency to 1
-            product_frequency[product_name] = 1
-            products = {
-                "Shop Name":  url.split("/")[4],
-                "Product Name": product_name,
-                "Price": product_price,
-                "Frequency": product_frequency[product_name],
-                "Product urls": product_url
-            }
-            productdata.append(products)
-        await random_sleep(mintime,maxtime)
+        products = {
+            "Shop Name":  url.split("/")[4],
+            "Product Name": product_name,
+            "Price": product_price,
+            "Frequency": 1,
+            "Product urls": product_url
+        }
+        productdata.append(products)
+    await random_sleep(mintime,maxtime)
 
     return productdata
 
@@ -197,13 +196,16 @@ async def main():
             except:
                 last_page_number = 1
             for page in range(1, last_page_number + 1):
-                data = await get_page_data(session, page, url, totaldata)
+                data = await get_page_data(session, page, url)
                 totaldata.extend(data)
                 shopname = url.split("/")[4]
                 print(data)
-                print(f"Page {page} done for {shopname}")
+                print(f"Page {page} done for {shopname} removing duplicates increase frequncy and saving to excel")
                 backupdf = pd.DataFrame(totaldata)
+                backupdf['Frequency'] = backupdf.groupby('Product Name')['Frequency'].transform('sum')
+                backupdf = backupdf.drop_duplicates(subset='Product Name')
                 backupdf.to_excel("Backup.xlsx", index=False)
+                totaldata = backupdf.to_dict('records')
     df = pd.DataFrame(totaldata)
     df.to_excel("output.xlsx", index=False)
 if __name__ == "__main__":
