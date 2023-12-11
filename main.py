@@ -63,7 +63,7 @@ async def fetch_product_data(session, product_url):
 
     
 
-async def get_page_data(session, page, url, totaldata):
+async def get_page_data(session, page, url):
     global mintime
     global maxtime
     cookies = {
@@ -131,12 +131,11 @@ async def get_page_data(session, page, url, totaldata):
         product_price = results[index]
 
         # Check if product already exists in productdata
-        existing_product = next((item for item in totaldata if item["Product Name"] == product_name), None)
+        existing_product = next((item for item in productdata if item["Product Name"] == product_name), None)
 
         if existing_product:
             # If product exists, increment frequency
             existing_product["Frequency"] += 1
-            
         else:
             # If product doesn't exist, add to productdata and set frequency to 1
             product_frequency[product_name] = 1
@@ -197,7 +196,7 @@ async def main():
             except:
                 last_page_number = 1
             for page in range(1, last_page_number + 1):
-                data = await get_page_data(session, page, url, totaldata)
+                data = await get_page_data(session, page, url)
                 totaldata.extend(data)
                 shopname = url.split("/")[4]
                 print(data)
